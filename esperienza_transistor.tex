@@ -1,0 +1,158 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{circuitikz}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{comment}
+
+\title{Relazione 4}
+\author{Valentino Drachuk, Stefano Chiavoni, Federico De Lucia}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+
+
+\section*{4.1  Transistor come interruttore}
+\addcontentsline{toc}{section}{Transistor come interruttore}
+
+Nella prima parte dell'esperienza, si vuole verificare il funzionamento di un transistor come interruttore per un LED \textit{RGB}. Per fare ciò, si è utilizzato un transistor NPN BC337 ed un LED rosso, caratterizzato da una $V_{\gamma}$ di circa $1.7 \si{\volt}$. Il circuito è rappresentato in Figura~\ref{fig:LED}.\\
+
+\begin{figure}[h]
+    \centering
+    \begin{circuitikz}[american, voltage shift=0.5,transform shape]
+        \draw(3,3) node[npn,tr circle] (t){};
+        \draw(0,0) to[voltage source,l=$V_B$,invert] (0,3) to[R,l=$R_B$,i=$I_B$]  (t.base);
+        \draw(t.collector) to [leDo,invert,i<^=$I_C$] ++ (2,0) to [R,l=$R_C$]++ (2,0) node[] (p1){};
+        \draw(0,0) to (0, 0-|p1.center) 
+        to [voltage source,l=$V_C$,invert] (p1.center);
+        \draw(t.emitter) to[short] (0,0-|t.emitter) node[ground] (){};
+        \draw(t.base) node[yshift=-3mm,xshift=-1mm] (){B};
+        \draw(t.emitter) node[right] (){E};
+        \draw(t.collector) node[above,left] (){C};
+    \end{circuitikz}
+    \caption{Configurazione ad emettitore per un transistor}
+~\label{fig:LED}
+\end{figure}
+
+
+Si è posta la $V_{C}$ a $10 \si{\volt}$ e si vuole che sul LED scorra una corrente $I_{C}$ pari a $10 \si{\milli\ampere}$. Inoltre, si vuole far lavorare il transistor in zona di saturazione e quindi avere $V_{BE} \approx 0.7 \si{\volt}$. Si è scelta $I_{B} = 1 \si{\milli\ampere}$ così che, da datasheet, risulti $V_{CE} \approx 0.1 \si{\volt}$. Dalla legge delle maglie applicata alla maglia di uscita si ha che  $R_{C} = \frac{V_{C}-V_{CE}-V_{\gamma}}{I_{C}} \approx 830 \si{\ohm}$. Analogamente, per la maglia di entrata, risulta $R_{B} = \frac{V_{B}-V_{BE}}{I_{B}} \approx 4.3 \si{\kilo\ohm}$.\\
+Per rispettare tale dimensionamento, si è posto $R_{B} = 4.4 \si{\kilo\ohm}(5\%)$, ottenuta con una serie tra $R_{1} = 3.9 \si{\kilo\ohm}$ e $R_{2} = 470 \si{\ohm}$, e $R_{C} = 820 \si{\ohm}(5\%)$. Tramite un multimetro si è poi misurato il punto di lavoro del transistor e si sono ottenuti i seguenti valori, che rispecchiano in pieno l'analisi teorica.\\
+\[ V_{BE} = (0.73 \pm 0.01) \si{\volt} , \ V_{CE} = (9.4 \pm 0.3) \si{\milli\volt} \]
+\[ I_{B} = (0.95\pm 0.01) \si{\milli\ampere} , \ I_{C} = (9.12 \pm 0.01) \si{\milli\ampere} \]
+
+Per completare l'esperienza si è verificato il comportamento del LED per vari \textit{duty cycle} di un'onda quadra in ingresso. Si è fornita un'onda quadra di frequenza $1 \si{\kilo\hertz}$ e ampiezza $5 \si{\volt}$ tramite il generatore di funzioni e si è variato il \textit{duty cycle} tra $0\%$ e $100\%$.
+Si è osservato che la luminosità del LED varia proporzionalmente al \textit{duty cycle} dell'onda quadra, come ci si aspettava.
+
+
+\section*{4.2 Transistor come amplificatore}
+\addcontentsline{toc}{section}{Transistor come amplificatore}
+
+
+\subsection*{4.2.1$-$4.2.2  Analisi statica e punto di lavoro} 
+\addcontentsline{toc}{subsection}{Analisi statica e punto di lavoro}
+
+
+\begin{figure}
+    \centering
+    \begin{circuitikz}[american, voltage shift=0.5,transform shape]
+        \draw node[npn,tr circle](t){}(3,0);
+        \draw (t.base)--++(-1,0)node[](p5){} to [R,l=$R_B$] ++(0,3)node[](p1){};
+        \draw (t.collector) to [R,l=$R_C$] (p1-|t.collector)node[](p2){};
+        \draw (p1.center) -- (p2.center) to [voltage source,l=$V_g$]++(2,0) node[ground](){};
+        \draw (t.collector) to [short,-*] ++(2,0)node[](p3){};
+        \draw (t.emitter) to ++(0,-2) node[ground](p4){}to[short,-*] (p4-|p3) to [open,v<=$V_{out}$](p3);
+        \draw (p5.center)to [C,l=$C$]++(-3,0)node[](p6){};
+        \draw (p6.center) to [R,l=$R_1$]++(-3,0)node[](p7){} to [voltage source, l_=$V_s(t)$] (p4-|p7)--(p4);
+        \draw (p6.center) to [R,l=$R_2$](p6|-p4);
+        \draw (t.base) node[above,xshift=-1mm](){B};
+        \draw (t.collector) node[left](){C};
+        \draw (t.emitter) node[left](){E};        
+    \end{circuitikz}
+    \caption{Amplificatore di piccoli segnali ad emettitore comune}
+~\label{fig:Transistor_total}
+\end{figure}
+
+ 
+
+In questa parte dell'esperienza si vuole determinare il punto di lavoro di un transistor in configurazione ad emettitore comune, come mostrato in Figura~\ref{fig:Transistor_total}. Per l'analisi statica, si può tralasciare momentanemante il condensatore $C$ e la tensione $V_{s}(t)$; la tensione $V_{C}$ vale $12 \si{\volt}$. Per cercare di far lavorare il transistore nel suo \textit{midpoint bias}, si vuole $V_{CE} \approx \frac{V_{cc}}{2}$ e $R_{C} \approx 220 \si{\ohm}$.\\
+Dalla legge di Ohm applicata alla resistenza $R_{C}$ si ha $I_{C} = \frac{V_{cc}-V_{CE}}{R_{C}} \approx 27 \si{\milli\ampere}$ e conseguentemente, dalla caratteristica di collettore riportata sul \textit{datasheet}, risulta $I_{B} \approx 0.05 \si{\milli\ampere}$. Dalla legge delle maglie segue che $R_{B} = \frac{V_{cc}-V_{BE}}{I_{B}} \approx 226 \si{\kilo\ohm}$, dove si è preso $V_{BE} \approx 0.6 \si{\volt}$, valore consultato sul \textit{datasheet}.\\
+Si è montato quindi il circuito con $R_{B} = 220 \si{\kilo\ohm}$ e $R_{C} = 220 \si{\ohm}$, e tramite un multimetro si sono misurati i seguenti valori, in pieno accordo con l'analisi teorica del ciruito:
+\[ V_{BE} = (0.616 \pm 0.005) \si{\volt} , \ V_{CE} = (5.99 \pm 0.05) \si{\volt} \]
+\[ I_{B} = (50.3 \pm 0.7) \si{\micro\ampere} , \ I_{C} = (26.0 \pm 0.6) \si{\milli\ampere} \]
+
+
+\subsection*{4.2.3  Stima di $h_{ie}$}
+\addcontentsline{toc}{subsection}{Stima di $h_{ie}$}
+
+In questa parte dell'esperienza si vuole stimare la resistenza di ingresso $h_{ie}$ del transistor. Siccome $h_{ie}$ è un parametro il cui valore è di solito riferito in $AC$, si è scelto di condurre l'analisi in corrente alternata ponendo una $V_{in}$ sinusoidale di ampiezza $200 \si{\milli\volt}$ e di frequenza $5\si{\kilo\hertz}$. Il circuito a cui si fa momentaneamente riferimento è sempre quello rappresentato in Figura~\ref{fig:Transistor_total}.\\
+ Per bloccare la componente continua, si è collegata una capacità in serie al generatore di tensione. Si è collegata una resistenza $R$ in serie alla base del transistor (non rappresentata in figura) e si sono misurate le tensioni $V_{1}$ e $V_{2}$, intese picco-picco, ai capi di queste. Poichè in $AC$ le resistenze di \textit{biasing} si possono considerare cortocircuitate, il circuito equivalente che ci interessa è un semplice partitore di tensione tra $R_{s}^{'}$, $R$ e $h_{ie}$, come si può vedere in Figura~\ref{fig:Transistor_h_ie}. Segue quindi che $\frac{V_{1}}{V_{2}} = \frac{R}{R+h_{ie}}$.Dopodichè, si è fatta variare la resistenza $R$ e si è sfruttata tale relazioni per fittare i dati sperimentali e stimare $h_{ie}$. In Figura~\ref{fig:h_ie} è riportato il grafico ottenuto.\\
+
+ \begin{figure}[h]
+    \centering
+    \begin{circuitikz}
+        \ctikzset{bipoles/oscope/waveform=sin}
+        \draw(0,0) to[sV, l=$V_s$] (0,3) 
+        to [R, l=$R_{s}^{'}$] (2,3)
+        to [R, l=$R$] (4,3)
+        to [R, l=$h_{ie}$] (6,3)
+        to (6,0)
+        to (0,0)
+        (0,0) node[ground]{};
+        
+        \draw(4,3) to[short] (4,3)
+              to[oscope, l=$V_{2}$] (4,0)
+              to[short] (4,0);
+    
+        \draw(2,3) to[short] (2,3)
+              to[oscope, l_=$V_{1}$] (2,0)
+              to[short] (2,0);
+    \end{circuitikz}
+    \caption{Partitore di tensione per la stima di $h_{ie}$. Nello schema si è volutamente omesso il condensatore in serie al generatore di tensione.}
+~\label{fig:Transistor_h_ie}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{h_ie_AC.png}
+    \caption{Grafico di $V_{1}/V_{2}$ in funzione della resistenza di base $R$}
+~\label{fig:h_ie}
+\end{figure}
+
+
+
+
+Dall'analisi dati risulta $h_{ie} = (4.50 \pm 0.05) \si{\kilo\ohm}$, che tuttavia non rispecchia il valore di $h_{ie}$ riportato nel datasheet ($\approx 1 \si{\kilo\ohm}$). Questo può essere dovuto a vari fattori, tra i quali lo stato di usura del transistor, la temperatura di lavoro, ecc. Se non altro, l'andamento della curva è quello atteso.\\ Per completezza si è anche condotta un'analisi in $DC$ per stimare $h_{ie}$, ma si è ottenuto un valore di $h_{ie} \approx 10 \si{\kilo\ohm}$, sempre in disaccordo con il valore fornito dal \textit{datasheet}.
+
+
+
+
+\subsection*{4.2.4$-$4.2.5 Partitore di tensione e capacità di protezione}
+\addcontentsline{toc}{subsection}{Partitore di tensione e capacità di protezione}
+
+Si vuole ora studiare il comportamento del transistor in configurazione ad emettitore comune come amplificatore di piccoli segnali. Il primo passo è quello di realizzare un partitore di tensione per adattare l'ampiezza del segnale in ingresso al transistor, come schematizzato in figura~\ref{fig:Transistor_total}. Si è scelto di ridurre l'ampiezza del segnale da $V_{s}$ di circa un fattore $100$. Per fare ciò, si è scelto $R_{1} = 100 \si{\kilo\ohm}$ e $R_{2} = 1 \si{\kilo\ohm}$. Da Thevenin risulta $V_{s}^{'} = V_{s} \frac{R_{2}}{R_{1}+R_{2}} \approx \frac{V_{s}}{100}$ e $R_{s}^{'} = R_{1}||R_{2} \approx 1 \si{\kilo\ohm}$.\\
+Dopodichè, si deve mettere una capacità in serie al generatore di funzioni per impedire alla $DC$ di scorrere in esso; il condensatore, in serie alla resistenza equivalente del partitore $R_{s}^{'}$ ed $h_{ie}$, costituisce infatti un filtro passa-alto.\\ Conviene dimensionare il filtro facendo in modo che la frequenza di taglio (la si vuole di circa $150 \si{\hertz}$) sia molto inferiore alla frequenza del segnale in ingresso ($\approx 5 \si{\kilo\hertz}$). Ricordando che in $AC$ le resistenze di \textit{biasing} si possono considerare cortocircuitate, il circuito equivalente che ci interessa è un semplice $RC$ con $R = (R_{s}^{'} + h_{ie})\approx 5.5 \si{\kilo\ohm}$ e $C$ la nostra capacità da dimensionare. Si vuole quindi $f_{c} = \frac{1}{2\pi R C} < 150 \si{\hertz}$, da cui si ricava $C_{\min} \approx 100 \si{\nano\farad}$. Nel circuito finale si è scelto $C = 220 \si{\nano\farad}$.\\
+
+
+\subsection*{4.2.6  Stima di $h_{fe}$}
+\addcontentsline{toc}{subsection}{Stima di $h_{fe}$}
+
+Per stimare il parametro ibrido $h_{fe}$ si è variata la tensione in ingresso $V_{in}$ del generatore e si è di conseguenza misurata la tensione in uscita $V_{out}$ tramite un oscilloscopio.
+La frequenza del segnale in entrata è mantenuta costante a $5 \si{\kilo\hertz}$ e si è variata l'ampiezza tra $100 \si{\milli\volt}$ e $3 \si{\volt}$.Per questa parte dell'esperienza si è usata una resistenza di carico $Z_{L}$ pari a $1 \si{\mega\ohm}$. In figura~\ref{fig:h_fe} è riportato il grafico ottenuto.\\
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{hfe_fit.png}
+    \caption{Grafico di $V_{out}$ in funzione di $V_{in}$}
+~\label{fig:h_fe}
+\end{figure}
+
+Tramite un fit lineare si è ottenuto $h_{fe} = 181(2\%)$, che risulta in accordo con l'intervallo di valori riportato sul datasheet ($100 \le h_{fe} \le 200$). Si ricorda che la pendenza della retta in figura~\ref{fig:h_fe} rappresenta il parametro $A_{v}$, ovvero il guadagno in tensione del transistor. Per ricavare $h_{fe}$ si è sfruttata la relazione $h_{fe} = A_{v} \frac{h_{ie}}{Z_{eq}}$.
+
+\end{document}
